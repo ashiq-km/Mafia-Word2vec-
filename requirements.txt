@@ -1,0 +1,20 @@
+# Data Handling
+numpy
+pandas
+
+# PDF Processing
+pypdf
+# or pdfminer.six (we will decide later)
+
+# NLP & Modeling
+gensim          # The standard for Word2Vec
+nltk
+spacy
+
+# Utilities
+jupyter
+tqdm            # Progress bars
+
+# MLOps (For later, but good to have ready)
+mlflow
+dvc
