@@ -19,3 +19,12 @@ tqdm            # Progress bars
 mlflow
 dvc
 
+
+fastapi
+uvicorn[standard] # The server that runs FastAPI
+
+streamlit
+requests          # So Streamlit can talk to FastAPI
+
+
+
