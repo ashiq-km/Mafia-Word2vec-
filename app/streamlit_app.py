@@ -1,119 +1,137 @@
 import streamlit as st
-import requests
+import os
+from pathlib import Path
+from gensim.models import Word2Vec
 
-# Backend URL
-API_URL = "http://localhost:8000"
+# --- FIX PATH ISSUE ---
+# Ensure project root is in sys.path so we can import config
+PROJECT_ROOT = Path(__file__).parent.parent
+CONFIG_PATH = PROJECT_ROOT / "src" / "config.py"
 
-# Page Config
+# Dynamically load MODEL_FILE from src/config.py
+import importlib.util
+spec = importlib.util.spec_from_file_location("config", CONFIG_PATH)
+config = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(config)
+MODEL_FILE = config.MODEL_FILE
+
+# --- PAGE SETUP ---
 st.set_page_config(
-    page_title="Godfather AI",
-    page_icon="🌹",
-    layout="centered",
+    page_title="🌹 Godfather AI",
+    page_icon="🕵️‍♂️",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-# ---------- Custom CSS ----------
-st.markdown("""
-<style>
+# --- TITLE & INFO ---
+st.title("🌹 The Godfather: Word Embeddings")
+st.markdown(
+    """
+    Explore semantic relationships in the Godfather novel using AI.  
+    🔍 Find similar words, perform analogies, and visualize relationships.
+    """
+)
 
-body {
-    background: linear-gradient(135deg, #0d0d0d 0%, #330000 100%);
-}
+# --- MODEL LOADING (CACHED) ---
+@st.cache_resource
+def load_model():
+    if not MODEL_FILE.exists():
+        return None
+    try:
+        model = Word2Vec.load(str(MODEL_FILE))
+        return model
+    except Exception as e:
+        st.error(f"Error loading model: {e}")
+        return None
 
-.block-container {
-    padding-top: 2rem;
-}
+model = load_model()
 
-.card {
-    background: rgba(255, 255, 255, 0.08);
-    padding: 1.5rem;
-    border-radius: 15px;
-    border: 1px solid rgba(255,255,255,0.15);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
+if model is None:
+    st.error(f"❌ Model not found at `{MODEL_FILE}`.")
+    st.warning("👉 Please run `python src/train.py` first to generate the model.")
+    st.stop()
 
-.result-item {
-    padding: 8px 12px;
-    margin-bottom: 6px;
-    background: rgba(255,255,255,0.06);
-    border-left: 4px solid #b30000;
-    border-radius: 6px;
-}
+# --- CREATE TABS ---
+tab1, tab2, tab3 = st.tabs([
+    "🔍 Find Similar Words", 
+    "➗ Word Math (Analogies)",
+    "📊 Vocabulary Stats"
+])
 
-</style>
-""", unsafe_allow_html=True)
-
-# ---------- Title ----------
-st.markdown("<h1 style='text-align:center; color:white;'>🌹 The Godfather Word Explorer</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align:center; color:#cccccc;'>Discover the hidden relationships between words inside The Godfather universe.</p>", unsafe_allow_html=True)
-
-st.write("")  # spacing
-
-# ---------- Tabs ----------
-tab1, tab2 = st.tabs(["🔍 Find Similar Words", "⚖️ Compare Two Words"])
-
-# ---------------- TAB 1: FIND SIMILAR WORDS -----------------
+# --- TAB 1: SIMILARITY ---
 with tab1:
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
+    st.subheader("Find Synonyms & Context")
+    col1, col2 = st.columns([1, 2])
     
-    st.subheader("🔎 Word Similarity Search")
-    word_input = st.text_input("Enter a word:", "godfather")
-
-    if st.button("Search Similar", use_container_width=True):
-        if word_input:
-            try:
-                response = requests.get(f"{API_URL}/similar/{word_input}")
-
-                if response.status_code == 200:
-                    data = response.json()
-                    st.success(f"Words similar to **'{word_input}'**:")
-
-                    for item in data:
-                        st.markdown(
-                            f"<div class='result-item'><b>{item['word']}</b> — confidence: {item['Score']}</div>",
-                            unsafe_allow_html=True
-                        )
-                else:
-                    st.error(f"Error: {response.json().get('detail')}")
-
-            except requests.exceptions.ConnectionError:
-                st.error("🚨 Backend API is down! Is FastAPI running?")
-
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
-# ---------------- TAB 2: COMPARE TWO WORDS -----------------
-with tab2:
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-
-    st.subheader("⚖️ Compare Words")
-
-    col1, col2 = st.columns(2)
     with col1:
-        w1 = st.text_input("Word 1:", "michael")
+        word_input = st.text_input(
+            "Enter a word (e.g., michael, gun):", 
+            "michael"
+        ).strip().lower()
+    
     with col2:
-        w2 = st.text_input("Word 2:", "son")
-
-    if st.button("Calculate Similarity", use_container_width=True):
-        try:
-            response = requests.get(f"{API_URL}/similarity?w1={w1}&w2={w2}")
-
-            if response.status_code == 200:
-                data = response.json()
-                score = data['Similarity']
-
-                st.metric(label="Cosine Similarity Score", value=f"{score:.4f}")
-
-                if score > 0.5:
-                    st.success("🔥 Strong Relationship! These words appear closely related.")
-                elif score > 0.2:
-                    st.warning("⚠️ Moderate Connection.")
-                else:
-                    st.info("❄️ Low Similarity. The words rarely appear in similar contexts.")
-
+        if word_input:
+            if word_input in model.wv:
+                similar = model.wv.most_similar(word_input, topn=10)
+                st.success(f"Words closest to **'{word_input}'**:")
+                
+                # Better display using columns
+                for w, score in similar:
+                    st.progress(score, text=f"{w} ({score:.2f})")
             else:
-                st.error(f"Error: {response.json().get('detail')}")
+                st.warning(f"⚠️ The word '{word_input}' is not in the vocabulary.")
 
-        except requests.exceptions.ConnectionError:
-            st.error("🚨 Backend API is down!")
+# --- TAB 2: ANALOGIES ---
+with tab2:
+    st.subheader("Semantic Analogies")
+    st.markdown("Equation: `Positive 1 - Negative + Positive 2 = Result`")
+    
+    c1, c2, c3 = st.columns(3)
+    with c1:
+        pos1 = st.text_input("Positive 1 (e.g., vito):", "vito").lower()
+    with c2:
+        neg = st.text_input("Negative (e.g., father):", "father").lower()
+    with c3:
+        pos2 = st.text_input("Positive 2 (e.g., son):", "son").lower()
 
-    st.markdown("</div>", unsafe_allow_html=True)
+    if st.button("Calculate Analogy Result"):
+        try:
+            result = model.wv.most_similar(
+                positive=[pos1, pos2],
+                negative=[neg],
+                topn=1
+            )
+            prediction, confidence = result[0]
+            st.balloons()
+            st.success(f"✨ **Result:** {prediction} ({confidence:.2f})")
+        except KeyError as e:
+            st.error(f"Word not found in vocabulary: {e}")
+
+# --- TAB 3: VOCAB STATS ---
+with tab3:
+    st.subheader("Vocabulary Overview")
+    st.info(f"Total words in vocabulary: **{len(model.wv)}**")
+    
+    # Show top 20 most frequent words
+    st.markdown("**Top 20 words (by frequency)**")
+    freqs = [(w, v) for w, v in model.wv.key_to_index.items()]
+    freqs = sorted(freqs, key=lambda x: x[1])[:20]
+    
+    for w, idx in freqs:
+        st.text(f"{w} → index: {idx}")
+    
+    st.markdown("---")
+    st.markdown("💡 Tip: Use the first tab to explore semantic similarity.")
+
+# --- SIDEBAR ---
+st.sidebar.header("Godfather AI Controls")
+st.sidebar.markdown(
+    """
+    - Use tabs to explore embeddings  
+    - Input words for similarity or analogies  
+    - Make sure to train the model first  
+    - This app works offline using local Word2Vec model
+    """
+)
+
+
