@@ -1,19 +1,7 @@
 import streamlit as st
-import os
 from pathlib import Path
+import requests
 from gensim.models import Word2Vec
-
-# --- FIX PATH ISSUE ---
-# Ensure project root is in sys.path so we can import config
-PROJECT_ROOT = Path(__file__).parent.parent
-CONFIG_PATH = PROJECT_ROOT / "src" / "config.py"
-
-# Dynamically load MODEL_FILE from src/config.py
-import importlib.util
-spec = importlib.util.spec_from_file_location("config", CONFIG_PATH)
-config = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(config)
-MODEL_FILE = config.MODEL_FILE
 
 # --- PAGE SETUP ---
 st.set_page_config(
@@ -23,7 +11,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- TITLE & INFO ---
 st.title("🌹 The Godfather: Word Embeddings")
 st.markdown(
     """
@@ -32,28 +19,49 @@ st.markdown(
     """
 )
 
-# --- MODEL LOADING (CACHED) ---
+# --- MODEL DOWNLOAD CONFIG ---
+MODEL_DIR = Path("data/models")
+MODEL_DIR.mkdir(parents=True, exist_ok=True)
+MODEL_PATH = MODEL_DIR / "godfather_w2v.model"
+
+# Google Drive direct download URL
+FILE_ID = "1S_nDsZgciriwEOYgcyvXcdZ3_1MyAYAv"
+MODEL_URL = f"https://drive.google.com/uc?id={FILE_ID}"
+
+# --- DOWNLOAD MODEL IF MISSING ---
 @st.cache_resource
-def load_model():
-    if not MODEL_FILE.exists():
-        return None
+def download_and_load_model():
+    if not MODEL_PATH.exists():
+        st.info("📥 Downloading pre-trained Word2Vec model...")
+        try:
+            response = requests.get(MODEL_URL, stream=True)
+            response.raise_for_status()
+            with open(MODEL_PATH, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    if chunk:
+                        f.write(chunk)
+            st.success("✅ Model downloaded successfully!")
+        except Exception as e:
+            st.error(f"Failed to download model: {e}")
+            return None
+
+    # Load the model
     try:
-        model = Word2Vec.load(str(MODEL_FILE))
+        model = Word2Vec.load(str(MODEL_PATH))
         return model
     except Exception as e:
-        st.error(f"Error loading model: {e}")
+        st.error(f"Failed to load model: {e}")
         return None
 
-model = load_model()
+# --- LOAD MODEL ---
+model = download_and_load_model()
 
 if model is None:
-    st.error(f"❌ Model not found at `{MODEL_FILE}`.")
-    st.warning("👉 Please run `python src/train.py` first to generate the model.")
     st.stop()
 
 # --- CREATE TABS ---
 tab1, tab2, tab3 = st.tabs([
-    "🔍 Find Similar Words", 
+    "🔍 Find Similar Words",
     "➗ Word Math (Analogies)",
     "📊 Vocabulary Stats"
 ])
@@ -64,10 +72,7 @@ with tab1:
     col1, col2 = st.columns([1, 2])
     
     with col1:
-        word_input = st.text_input(
-            "Enter a word (e.g., michael, gun):", 
-            "michael"
-        ).strip().lower()
+        word_input = st.text_input("Enter a word (e.g., michael, gun):", "michael").strip().lower()
     
     with col2:
         if word_input:
@@ -75,7 +80,6 @@ with tab1:
                 similar = model.wv.most_similar(word_input, topn=10)
                 st.success(f"Words closest to **'{word_input}'**:")
                 
-                # Better display using columns
                 for w, score in similar:
                     st.progress(score, text=f"{w} ({score:.2f})")
             else:
@@ -112,16 +116,11 @@ with tab3:
     st.subheader("Vocabulary Overview")
     st.info(f"Total words in vocabulary: **{len(model.wv)}**")
     
-    # Show top 20 most frequent words
     st.markdown("**Top 20 words (by frequency)**")
-    freqs = [(w, v) for w, v in model.wv.key_to_index.items()]
-    freqs = sorted(freqs, key=lambda x: x[1])[:20]
-    
-    for w, idx in freqs:
-        st.text(f"{w} → index: {idx}")
-    
-    st.markdown("---")
-    st.markdown("💡 Tip: Use the first tab to explore semantic similarity.")
+    # gensim doesn't provide raw frequency easily; using key_to_index as proxy
+    top_words = list(model.wv.key_to_index.keys())[:20]
+    for i, w in enumerate(top_words, start=1):
+        st.text(f"{i}. {w}")
 
 # --- SIDEBAR ---
 st.sidebar.header("Godfather AI Controls")
@@ -129,9 +128,7 @@ st.sidebar.markdown(
     """
     - Use tabs to explore embeddings  
     - Input words for similarity or analogies  
-    - Make sure to train the model first  
-    - This app works offline using local Word2Vec model
+    - Model automatically downloads if missing  
+    - Works offline after first run
     """
 )
-
-
