@@ -21,4 +21,4 @@ mlruns/
 .dvc/
 .env
 
-.html
+*.html
