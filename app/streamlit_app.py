@@ -15,7 +15,7 @@ st.set_page_config(
 st.title("🌹 The Godfather: Word Embeddings")
 st.markdown(
     """
-    Explore semantic relationships in the Godfather novel using AI.  
+    Explore semantic relationships in the Godfather novel using AI.
     🔍 Find similar words, perform analogies, and visualize relationships.
     """
 )
@@ -88,7 +88,8 @@ with tab1:
                 for w, score in similar:
                     st.progress(score, text=f"{w} ({score:.2f})")
             else:
-                st.warning(f"⚠️ The word '{word_input}' is not in the vocabulary.")
+                st.warning(f"⚠️ The word '{word_input}' \
+                           is not in the vocabulary.")
 
 # --- TAB 2: ANALOGIES ---
 with tab2:
@@ -129,9 +130,9 @@ with tab3:
 st.sidebar.header("Godfather AI Controls")
 st.sidebar.markdown(
     """
-    - Use tabs to explore embeddings  
-    - Input words for similarity or analogies  
-    - Model automatically downloads if missing  
+    - Use tabs to explore embeddings
+    - Input words for similarity or analogies
+    - Model automatically downloads if missing
     - Works offline after first run
     """
 )
