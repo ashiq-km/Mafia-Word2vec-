@@ -1,4 +1,5 @@
-# We will create an API that has one job: take a word. look up the math, and return the similar words.
+# We will create an API that has one job:
+# take a word. look up the math, and return the similar words.
 
 
 from contextlib import asynccontextmanager
@@ -22,7 +23,8 @@ async def lifespan(app: FastAPI):
     print("Loading model...")
     if not config.MODEL_FILE.exists():
 
-        # In Production, you might want to download the model from S3 / DVC here
+        # In Production, you might want to
+        # download the model from S3 / DVC here
         raise FileNotFoundError("Model file not found. Run training first.")
 
     # Load the full model
@@ -51,7 +53,10 @@ app = FastAPI(
 
 @app.get("/")
 def home():
-    return {"message": "Welcome to the Godfather API. Go to the /docs for testing."}
+    return {
+        "message": "Welcome to the Godfather API. \
+            Go to the /docs for testing."
+    }
 
 
 @app.get("/similar/{word}")
@@ -94,7 +99,9 @@ def get_similarity(w1: str, w2: str):
 
     if w1 not in model_wv or w2 not in model_wv:
         raise HTTPException(
-            status_code=404, detail="One of the words is missing from the vocabulary."
+            status_code=404,
+            detail="One of the words is \
+                missing from the vocabulary.",
         )
 
     score = model_wv.similarity(w1, w2)

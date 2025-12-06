@@ -25,7 +25,8 @@ def train_model():
     # Check if data exists
     if not config.PROCESSED_DATA_FILE.exists():
         raise FileNotFoundError(
-            f"Processed data not found at {config.PROCESSED_DATA_FILE}. Run preprocess.py first."
+            f"Processed data not found at {config.PROCESSED_DATA_FILE}. \
+                Run preprocess.py first."
         )
 
     # Load sentences using LineSentence (memory efficient)
