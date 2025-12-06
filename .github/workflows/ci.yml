@@ -43,10 +43,10 @@ jobs:
      # This will recursively check all .py files everywhere.
 
 
-     - name: Run Black and Flake8
-       run: |
-         black --check .
-         flake8 .
+      - name: Run Black and Flake8
+        run: |
+          black --check .
+          flake8 .
 
 
 
