@@ -1,6 +1,7 @@
 import mlflow
 from gensim.models import Word2Vec
 from gensim.models.word2vec import LineSentence
+
 import src.config as config
 
 

@@ -1,11 +1,12 @@
 # We will create an API that has one job: take a word. look up the math, and return the similar words.
 
 
-from fastapi import FastAPI, HTTPException
-from gensim.models import Word2Vec
-import src.config as config
 from contextlib import asynccontextmanager
 
+from fastapi import FastAPI, HTTPException
+from gensim.models import Word2Vec
+
+import src.config as config
 
 # Global variable to hold the model
 

@@ -1,10 +1,10 @@
-import pypdf
 import nltk
-from nltk.tokenize import sent_tokenize
+import pypdf
 from gensim.utils import simple_preprocess
+from nltk.tokenize import sent_tokenize
 from tqdm import tqdm
-import src.config as config
 
+import src.config as config
 
 # Download NLTK resources:
 

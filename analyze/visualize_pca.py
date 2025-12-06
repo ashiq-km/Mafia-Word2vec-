@@ -1,10 +1,9 @@
-from src.config import MODEL_FILE
+import plotly.graph_objects as go
+import plotly.offline as pyo
 from gensim.models import Word2Vec
 from sklearn.decomposition import PCA
-import plotly.graph_objects as go
-import matplotlib.pyplot as plt
-import plotly.offline as pyo
 
+from src.config import MODEL_FILE
 
 # --- Load Word2Vec model ---
 print("Loading model:", MODEL_FILE)

@@ -1,6 +1,7 @@
-import streamlit as st
 from pathlib import Path
+
 import requests
+import streamlit as st
 from gensim.models import Word2Vec
 
 # --- PAGE SETUP ---
