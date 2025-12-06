@@ -70,7 +70,7 @@ def main():
     all_sentences = []
 
     for pdf_file in tqdm(config.RAW_DATA_FILES,
-                          desc="Processing PDFs", leave=False):
+                         desc="Processing PDFs", leave=False):
         raw_text = get_text_from_pdf(pdf_file)
         sentences = clean_tokenize(raw_text)
         all_sentences.extend(sentences)
@@ -83,7 +83,7 @@ def main():
 
     with open(config.PROCESSED_DATA_FILE, "w", encoding="utf-8") as f:
         for sentence in tqdm(all_sentences,
-                              desc="Writing sentences", leave=False):
+                             desc="Writing sentences", leave=False):
             f.write(" ".join(sentence) + "\n")
 
     print("Preprocessing complete!")
