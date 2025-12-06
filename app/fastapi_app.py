@@ -53,8 +53,10 @@ app = FastAPI(
 
 @app.get("/")
 def home():
-    return {"message": "Welcome to the Godfather API. \
-            Go to the /docs for testing."}
+    return {
+        "message": "Welcome to the Godfather API. \
+            Go to the /docs for testing."
+    }
 
 
 @app.get("/similar/{word}")
@@ -97,8 +99,9 @@ def get_similarity(w1: str, w2: str):
 
     if w1 not in model_wv or w2 not in model_wv:
         raise HTTPException(
-            status_code=404, detail="One of the words is \
-                missing from the vocabulary."
+            status_code=404,
+            detail="One of the words is \
+                missing from the vocabulary.",
         )
 
     score = model_wv.similarity(w1, w2)

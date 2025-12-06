@@ -88,8 +88,10 @@ with tab1:
                 for w, score in similar:
                     st.progress(score, text=f"{w} ({score:.2f})")
             else:
-                st.warning(f"⚠️ The word '{word_input}' \
-                           is not in the vocabulary.")
+                st.warning(
+                    f"⚠️ The word '{word_input}' \
+                           is not in the vocabulary."
+                )
 
 # --- TAB 2: ANALOGIES ---
 with tab2:

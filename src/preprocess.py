@@ -24,8 +24,12 @@ def get_text_from_pdf(pdf_path):
 
         reader = pypdf.PdfReader(str(pdf_path))
 
-        for page in tqdm(reader.pages, desc=f"Reading \
-                         {pdf_path.name}", leave=False):
+        for page in tqdm(
+            reader.pages,
+            desc=f"Reading \
+                         {pdf_path.name}",
+            leave=False,
+        ):
             page_text = page.extract_text()
 
             if page_text:
@@ -65,8 +69,7 @@ def main():
 
     all_sentences = []
 
-    for pdf_file in tqdm(config.RAW_DATA_FILES,
-                         desc="Processing PDFs", leave=False):
+    for pdf_file in tqdm(config.RAW_DATA_FILES, desc="Processing PDFs", leave=False):
         raw_text = get_text_from_pdf(pdf_file)
         sentences = clean_tokenize(raw_text)
         all_sentences.extend(sentences)
@@ -77,10 +80,8 @@ def main():
 
     print(f"Saving to {config.PROCESSED_DATA_FILE}...")
 
-    with open(config.PROCESSED_DATA_FILE,
-              "w", encoding="utf-8") as f:
-        for sentence in tqdm(all_sentences,
-                             desc="Writing sentences", leave=False):
+    with open(config.PROCESSED_DATA_FILE, "w", encoding="utf-8") as f:
+        for sentence in tqdm(all_sentences, desc="Writing sentences", leave=False):
             f.write(" ".join(sentence) + "\n")
 
     print("Preprocessing complete!")
