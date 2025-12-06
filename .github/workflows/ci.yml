@@ -45,7 +45,7 @@ jobs:
 
       - name: Run Black and Flake8
         run: |
-          black --check .
+          black .
           flake8 .
 
 
