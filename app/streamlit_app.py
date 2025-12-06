@@ -8,7 +8,7 @@ st.set_page_config(
     page_title="🌹 Godfather AI",
     page_icon="🕵️‍♂️",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
 st.title("🌹 The Godfather: Word Embeddings")
@@ -27,6 +27,7 @@ MODEL_PATH = MODEL_DIR / "godfather_w2v.model"
 # Google Drive direct download URL
 FILE_ID = "1S_nDsZgciriwEOYgcyvXcdZ3_1MyAYAv"
 MODEL_URL = f"https://drive.google.com/uc?id={FILE_ID}"
+
 
 # --- DOWNLOAD MODEL IF MISSING ---
 @st.cache_resource
@@ -53,6 +54,7 @@ def download_and_load_model():
         st.error(f"Failed to load model: {e}")
         return None
 
+
 # --- LOAD MODEL ---
 model = download_and_load_model()
 
@@ -60,26 +62,28 @@ if model is None:
     st.stop()
 
 # --- CREATE TABS ---
-tab1, tab2, tab3 = st.tabs([
-    "🔍 Find Similar Words",
-    "➗ Word Math (Analogies)",
-    "📊 Vocabulary Stats"
-])
+tab1, tab2, tab3 = st.tabs(
+    ["🔍 Find Similar Words", "➗ Word Math (Analogies)", "📊 Vocabulary Stats"]
+)
 
 # --- TAB 1: SIMILARITY ---
 with tab1:
     st.subheader("Find Synonyms & Context")
     col1, col2 = st.columns([1, 2])
-    
+
     with col1:
-        word_input = st.text_input("Enter a word (e.g., michael, gun):", "michael").strip().lower()
-    
+        word_input = (
+            st.text_input("Enter a word (e.g., michael, gun):", "michael")
+            .strip()
+            .lower()
+        )
+
     with col2:
         if word_input:
             if word_input in model.wv:
                 similar = model.wv.most_similar(word_input, topn=10)
                 st.success(f"Words closest to **'{word_input}'**:")
-                
+
                 for w, score in similar:
                     st.progress(score, text=f"{w} ({score:.2f})")
             else:
@@ -89,7 +93,7 @@ with tab1:
 with tab2:
     st.subheader("Semantic Analogies")
     st.markdown("Equation: `Positive 1 - Negative + Positive 2 = Result`")
-    
+
     c1, c2, c3 = st.columns(3)
     with c1:
         pos1 = st.text_input("Positive 1 (e.g., vito):", "vito").lower()
@@ -101,9 +105,7 @@ with tab2:
     if st.button("Calculate Analogy Result"):
         try:
             result = model.wv.most_similar(
-                positive=[pos1, pos2],
-                negative=[neg],
-                topn=1
+                positive=[pos1, pos2], negative=[neg], topn=1
             )
             prediction, confidence = result[0]
             st.balloons()
@@ -115,7 +117,7 @@ with tab2:
 with tab3:
     st.subheader("Vocabulary Overview")
     st.info(f"Total words in vocabulary: **{len(model.wv)}**")
-    
+
     st.markdown("**Top 20 words (by frequency)**")
     # gensim doesn't provide raw frequency easily; using key_to_index as proxy
     top_words = list(model.wv.key_to_index.keys())[:20]

@@ -18,5 +18,3 @@ MODEL_FILE = MODELS_DIR / "godfather_w2v.model"
 # Create directories if they don't exist (safety check)
 PROCESSED_DATA_DIR.mkdir(parents=True, exist_ok=True)
 MODELS_DIR.mkdir(parents=True, exist_ok=True)
-
-

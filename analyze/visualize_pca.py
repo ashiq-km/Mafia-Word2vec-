@@ -28,27 +28,19 @@ fig.add_trace(
         x=result[:, 0],
         y=result[:, 1],
         z=result[:, 2],
-        mode='markers+text',
-        text=words,          # Shows the word when hovering
+        mode="markers+text",
+        text=words,  # Shows the word when hovering
         textposition="top center",
-        marker=dict(
-            size=5,
-            color='blue',
-            opacity=0.8
-        )
+        marker=dict(size=5, color="blue", opacity=0.8),
     )
 )
 
 # --- Layout ---
 fig.update_layout(
     title="Word2Vec PCA 3D Visualization",
-    scene=dict(
-        xaxis_title='PCA 1',
-        yaxis_title='PCA 2',
-        zaxis_title='PCA 3'
-    ),
-    margin=dict(l=0, r=0, b=0, t=50)
+    scene=dict(xaxis_title="PCA 1", yaxis_title="PCA 2", zaxis_title="PCA 3"),
+    margin=dict(l=0, r=0, b=0, t=50),
 )
 
 # --- Show Interactive Plot ---
-pyo.plot(fig, filename = "analyze/pca_visual.html")
+pyo.plot(fig, filename="analyze/pca_visual.html")
