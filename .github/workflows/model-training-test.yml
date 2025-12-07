@@ -31,11 +31,12 @@ jobs:
 
       - name: Configure DVC with Service Account
         env:
-          GCP_SA_KEY: ${{  secrets.GCP_SERVICE_ACCOUNT_KEY  }}
+          GCP_SA_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
         run: |
           echo "$GCP_SA_KEY" > service_account.json
           dvc remote modify storage gdrive_use_service_account true
           dvc remote modify storage gdrive_service_account_json_file_path service_account.json
+        working-directory: .
 
 
       - name: Pull data from Google drive
