@@ -1,0 +1,27 @@
+[project]
+
+name = "mafia-Word2Vec"
+version = "0.1.0"
+
+description = "A simple NLP project experimenting with Word2Vec training and semantic similarity."
+
+authors = [
+    {name = "Ashiq KM", email = "ashiq.dev@outlook.com"}
+]
+
+requires-python = ">=3.10"
+
+readme = "Readme.md"
+
+# ------------------------------------ Tool Configurations ---------------------------------
+
+[tool.black] 
+line-length = 88
+target-version = ["py310"]
+
+[flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
+
+
+
