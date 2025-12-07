@@ -40,9 +40,23 @@ Mafia-Word2Vec/
 │   ├── train.py               # Train + log model to MLflow
 │   ├── test_model.py          # Manual testing of learned vectors
 │
-├── mlruns/                    # MLflow experiment storage
+├── app/
+│    ├── fastapi_app.py
+│    ├── streamlit_app.py
 │
-├── requirements.txt           
+├── notebooks/
+│    ├── data_preprocessing.ipynb
+│    ├── model_training.ipynb
+│
+├── .github/workflows/
+|    ├── ci.yml
+│
+├── requirements.txt
+├── .flake8
+├── pyproject.toml
+├── .dvcignore
+├── .dockerignore
+├── .gitignore        
 ├── README.md
 
 ```
