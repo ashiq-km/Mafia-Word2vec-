@@ -1,0 +1,58 @@
+name: Model Training & Testing
+
+
+on:
+  push:
+    branches:  [main, yml_workflow]
+  pull_request:
+    branches:  [main]
+
+  workflow_dispatch: # Allows manual trigger
+
+jobs:
+  train-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-verson: '3.10'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install "dvc[gdrive]"
+
+
+      - name: Configure DVC with Service Account
+        env:
+          GCP_SA_KEY: ${{  secrets.GCP_SERVICE_ACCOUNT_KEY  }}
+        run: |
+          echo "$GCP_SA_KEY" > service_account.json
+          dvc remote modify storage gdrive_use_service_account true
+          dvc remote modify storage gdrive_service_account_json_file_path service_account.json
+
+
+      - name: Pull data from Google drive
+        run: |
+          dvc pull
+
+      - name: Run Pre-processing
+        run: |
+          python src/preprocess.py
+
+      - name: Train Model
+        run: |
+         python src/train.py
+
+      - name: Upload model artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: trained-model
+          path: data/models/
+          retention-days: 7
