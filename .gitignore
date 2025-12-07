@@ -18,7 +18,11 @@ data/models/
 # Tools
 
 mlruns/
-.dvc/
 .env
 
 *.html
+
+# DVC - ignore cache and temp, but track config
+.dvc/cache/
+.dvc/tmp/
+.dvc/config.local
