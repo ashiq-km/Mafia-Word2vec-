@@ -1,5 +1,9 @@
 # ✨ Mafia Word2Vec – Custom NLP Embeddings Project
 
+
+![god_father_rd](https://github.com/user-attachments/assets/867d20a6-ef4d-4911-bad6-e39e93bc3a32)
+
+
 This project trains a custom Word2Vec model on The Godfather / Mafia-themed text corpus and provides tools to:
 
 preprocess raw text
