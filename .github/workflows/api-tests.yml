@@ -10,7 +10,6 @@ jobs:
   api-tests:
     runs-on: ubuntu-latest
 
-
     env:
       PYTHONPATH: ${{ github.workspace }}
 
@@ -27,33 +26,35 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
-          pip install dvc[gdrive] pytest httpx
+          pip install "dvc[gdrive]"
 
-      - name: Create Google Drive credentials
+      - name: Configure DVC with Service Account
         env:
-          GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+          GCP_SA_KEY: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
         run: |
-          echo "$GDRIVE_CREDENTIALS_DATA" > gdrive_credentials.json
-
-      - name: Configure DVC and pull model
-        run: |
+          echo "$GCP_SA_KEY" > service_account.json
           dvc remote modify storage gdrive_use_service_account true
-          dvc remote modify storage gdrive_service_account_json_file_path gdrive_credentials.json
-          dvc pull -v models/word2vec_godfather.model.dvc
+          dvc remote modify storage gdrive_service_account_json_file_path service_account.json
 
-      - name: Verify model loaded
+      - name: Pull model & data from Google Drive
         run: |
-          python -c "
+          dvc pull
+
+      - name: Verify model loads correctly
+        run: |
+          python - << 'EOF'
           from gensim.models import Word2Vec
           import src.config as config
+          print("MODEL FILE:", config.MODEL_FILE)
           model = Word2Vec.load(str(config.MODEL_FILE))
-          print(f'✓ Model loaded: {len(model.wv)} words')
-          "
+          print("✓ Model loaded successfully")
+          print(f"Vocabulary size: {len(model.wv)} words")
+          EOF
 
       - name: Start FastAPI server
         run: |
           uvicorn src.fastapi_app:app --host 0.0.0.0 --port 8000 &
-          sleep 5
+          sleep 7
 
       - name: Test health endpoint
         run: |
@@ -61,7 +62,7 @@ jobs:
 
       - name: Test similar words endpoint
         run: |
-          curl -f http://localhost:8000/similar/godfather?topn=3
+          curl -f "http://localhost:8000/similar/godfather?topn=3"
 
       - name: Test similarity endpoint
         run: |
@@ -79,5 +80,4 @@ jobs:
         if: always()
         run: |
           pkill -f uvicorn || true
-          rm -f gdrive_credentials.json
-
+          rm -f service_account.json
