@@ -278,7 +278,7 @@ def get_similarity(w1: str, w2: str):
     return {"word1": w1_clean, "word2": w2_clean, "similarity": float(score)}
 
 
-@app.get("/vocabulary", response_model=VocabularyResponse, tags=["General"])
+@app.get("/vocabulary", response_model=VocabResponse, tags=["General"])
 def get_vocabulary(sample_size: int = Query(20, ge=1, le=100)):
     """
     Get vocabulary information.
