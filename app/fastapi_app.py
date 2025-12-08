@@ -139,7 +139,8 @@ class SimilarityResponse(BaseModel):
 
 
 class VocabResponse(BaseModel):
-    vocabulary: List[str] = Field(..., description="List of words in the vocabulary")
+    total_words: int
+    sample_words: List[str]
 
 
 class HealthResponse(BaseModel):
