@@ -342,3 +342,19 @@ def check_word_exists(word: str):
     model_wv = get_model()
 
     return {"word": word, "exists": clean_word in model_wv}
+
+
+@app.get("/health", response_model=HealthResponse, tags=["General"])
+def health_check():
+    """
+    Health check endpoint — verifies API and model status.
+    """
+    model_wv = ml_models.get("wv")
+    is_loaded = model_wv is not None
+
+    return {
+        "status": "ok" if is_loaded else "model_not_loaded",
+        "model_loaded": is_loaded,
+        "vocabulary_size": len(model_wv) if is_loaded else None,
+    }
+
