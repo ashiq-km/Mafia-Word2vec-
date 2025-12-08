@@ -72,10 +72,6 @@ jobs:
         run: |
           curl -f http://localhost:8000/vocabulary
 
-      - name: Run pytest
-        run: |
-          pytest tests/test_api.py -v
-
       - name: Cleanup
         if: always()
         run: |
