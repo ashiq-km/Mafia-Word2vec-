@@ -110,8 +110,6 @@
 ###############################################################################
 
 
-
-
 """
 Enhanced FastAPI application for Word2Vec similarity API
 """
@@ -141,12 +139,12 @@ class SimilarityResponse(BaseModel):
 
 
 class VocabResponse(BaseModel):
-    vocabulary: List[str] = Field(..., description="List of words in the vocabulary")   
+    vocabulary: List[str] = Field(..., description="List of words in the vocabulary")
 
 
 class HealthResponse(BaseModel):
-    status: str = Field(..., description="Health status of the API")    
-    
+    status: str = Field(..., description="Health status of the API")
+
     status: str
     model_loaded: bool
     vocabulary_size: Optional[int] = None
@@ -155,6 +153,7 @@ class HealthResponse(BaseModel):
 # --- Global Variables to hold the model ---
 
 ml_models = {}
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -181,15 +180,15 @@ async def lifespan(app: FastAPI):
     print("Cleaning up resources...")
     ml_models.clear()
 
-
     # Initialize the App with the lifespan manager
+
+
 app = FastAPI(
     title="Godfather Word2Vec API",
     description="API for finding similar words using Word2Vec trained on The Godfather",
     version="1.0.0",
     lifespan=lifespan,
 )
-
 
 
 # --- Helper Functions ---
@@ -205,7 +204,7 @@ def get_model():
     return model_wv
 
 
---- API Endpoints ---
+# --- API Endpoints ---
 
 
 @app.get("/", tags=["General"])
@@ -219,7 +218,7 @@ def home():
             "similar_words": "/similar/{word}",
             "similarity": "/similarity?w1=word1&w2=word2",
             "vocabulary": "/vocabulary",
-            "analogy": "/analogy?positive=king,woman&negative=man"
+            "analogy": "/analogy?positive=king,woman&negative=man",
         },
     }
 
@@ -245,8 +244,8 @@ def get_similar_words(
         raise HTTPException(
             status_code=404, detail=f"Word '{word}' not found in vocabulary."
         )
-    
-     # Get similarities
+
+    # Get similarities
     results = model_wv.most_similar(clean_word, topn=topn)
 
     return [{"word": w, "score": float(s)} for w, s in results]
@@ -294,7 +293,6 @@ def get_vocabulary(sample_size: int = Query(20, ge=1, le=100)):
     return {"total_words": len(vocab), "sample_words": sample}
 
 
-
 @app.get("/analogy", response_model=List[SimilarWordResponse], tags=["Word Similarity"])
 def get_analogy(
     positive: str = Query(..., description="Comma-separated positive words"),
@@ -318,17 +316,16 @@ def get_analogy(
         raise HTTPException(
             status_code=400, detail="At least one positive word required."
         )
-    
- # Check all words exist
+
+    # Check all words exist
     all_words = pos_words + neg_words
     for word in all_words:
         if word not in model_wv:
             raise HTTPException(
                 status_code=404, detail=f"Word '{word}' not in vocabulary."
             )
-        
 
-# Compute analogy
+    # Compute analogy
     try:
         results = model_wv.most_similar(
             positive=pos_words, negative=neg_words, topn=topn
@@ -336,7 +333,6 @@ def get_analogy(
         return [{"word": w, "score": float(s)} for w, s in results]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analogy computation failed: {e}")
-    
 
 
 @app.get("/word-exists/{word}", tags=["General"])
@@ -346,24 +342,3 @@ def check_word_exists(word: str):
     model_wv = get_model()
 
     return {"word": word, "exists": clean_word in model_wv}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

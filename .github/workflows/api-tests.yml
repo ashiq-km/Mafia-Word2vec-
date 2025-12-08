@@ -10,6 +10,10 @@ jobs:
   api-tests:
     runs-on: ubuntu-latest
 
+
+    env:
+      PYTHONPATH: ${{ github.workspace }}
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -76,4 +80,4 @@ jobs:
         run: |
           pkill -f uvicorn || true
           rm -f gdrive_credentials.json
-          
+
